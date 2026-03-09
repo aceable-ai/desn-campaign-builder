@@ -91,8 +91,6 @@ export const LandscapeTemplate = forwardRef<HTMLDivElement, Props>(({ config }, 
               paddingRight: 32,
               paddingBottom: 18,
               paddingLeft: 32,
-              borderRadius: 11,
-              border: '4px dashed #DB306A',
             }}
           />
         </div>

@@ -57,12 +57,12 @@ export function HeadlineEditor() {
                 <button
                   key={`${word.text}-${i}`}
                   onClick={() => toggleWordHighlight(i)}
-                  className={`rounded px-2 py-0.5 text-sm font-medium transition-all ${
+                  className={`rounded px-2 py-0.5 text-sm transition-all bg-gray-100 hover:bg-gray-200 ${
                     word.highlighted
-                      ? 'ring-1 text-white'
-                      : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                      ? 'font-bold'
+                      : 'font-medium text-gray-700'
                   }`}
-                  style={word.highlighted ? { backgroundColor: '#db306a' } : {}}
+                  style={word.highlighted ? { color: '#DB306A' } : {}}
                 >
                   {word.text}
                 </button>

@@ -1,4 +1,5 @@
 import type { CSSProperties } from 'react';
+import { useRef, useState, useLayoutEffect } from 'react';
 import type { AssetConfig } from '../../../types/asset';
 import { DESIGN_TOKENS } from '../../../constants/sizes';
 import aceableLogo          from '../../../assets/logos/aceable.svg?url';
@@ -147,19 +148,49 @@ interface DashedCtaBoxProps {
 
 export function DashedCtaBox({ ctaText, fontSize = 42, style }: DashedCtaBoxProps) {
   const scale = fontSize / 42;
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [size, setSize] = useState({ width: 0, height: 0 });
+
+  useLayoutEffect(() => {
+    if (containerRef.current) {
+      setSize({ width: containerRef.current.offsetWidth, height: containerRef.current.offsetHeight });
+    }
+  }, [ctaText, fontSize]);
+
+  const strokeWidth = 4 * scale;
+  const radius = Math.round(11 * scale);
+  const dash = 12 * scale;
+
   return (
-    <div style={{
+    <div ref={containerRef} style={{
+      position: 'relative',
       display: 'inline-flex',
       alignItems: 'center',
       justifyContent: 'center',
-      border: `${Math.round(4 * scale)}px dashed #DB306A`,
-      borderRadius: Math.round(11 * scale),
       paddingTop: Math.round(24 * scale),
       paddingRight: Math.round(48 * scale),
       paddingBottom: Math.round(24 * scale),
       paddingLeft: Math.round(48 * scale),
       ...style,
     }}>
+      {size.width > 0 && (
+        <svg
+          style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', pointerEvents: 'none', overflow: 'visible' }}
+        >
+          <rect
+            x={strokeWidth / 2}
+            y={strokeWidth / 2}
+            width={size.width - strokeWidth}
+            height={size.height - strokeWidth}
+            rx={radius}
+            fill="none"
+            stroke="#DB306A"
+            strokeWidth={strokeWidth}
+            strokeDasharray={`${dash} ${dash}`}
+            strokeLinecap="round"
+          />
+        </svg>
+      )}
       <span style={{
         fontFamily: FONT,
         fontSize,

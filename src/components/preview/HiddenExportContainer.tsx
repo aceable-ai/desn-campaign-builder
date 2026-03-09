@@ -25,7 +25,6 @@ export function HiddenExportContainer({ config, squareRef, portraitRef, storyRef
         position: 'absolute',
         left: -9999,
         top: 0,
-        visibility: 'hidden',
         pointerEvents: 'none',
       }}
     >

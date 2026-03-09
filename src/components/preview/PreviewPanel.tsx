@@ -85,10 +85,10 @@ export function PreviewPanel({ squareRef, portraitRef, storyRef, landscapeRef }:
           <button
             onClick={handleExport}
             disabled={isExporting}
-            className={`flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-semibold transition-all ${
+            className={`flex items-center gap-2 rounded-full px-4 py-2 text-sm font-semibold transition-all ${
               isExporting
                 ? 'cursor-not-allowed bg-white/20 text-white/40'
-                : 'bg-[#E8574A] text-white hover:bg-[#d44a3d] active:scale-95'
+                : 'bg-[#DB306A] text-white hover:bg-[#c22a5f] active:scale-95'
             }`}
           >
             {isExporting ? (
