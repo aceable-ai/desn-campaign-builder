@@ -12,7 +12,7 @@ function buildIterableHtml(templateEl: HTMLDivElement): string {
   const tileSection = clone.querySelector('[data-section="hero-tiles"]') as HTMLElement | null;
   if (tileSection) {
     tileSection.style.padding = '0';
-    tileSection.innerHTML = '<img src="HERO_IMAGE_PLACEHOLDER" width="600" style="display:block;width:100%" alt="" />';
+    tileSection.innerHTML = '<img data-hero-src="HERO_IMAGE_PLACEHOLDER" width="600" style="display:block;width:100%" alt="" />';
   }
 
   return `<!DOCTYPE html>

@@ -35,7 +35,7 @@ app.post('/api/push-to-iterable', async (req, res) => {
     const imageUrl = `${protocol}://${req.headers.host}/uploads/${filename}`;
 
     // Inject the image URL into the HTML and create the Iterable template
-    const finalHtml = htmlBody.replace('HERO_IMAGE_PLACEHOLDER', imageUrl);
+    const finalHtml = htmlBody.replace('data-hero-src="HERO_IMAGE_PLACEHOLDER"', `src="${imageUrl}"`);
     const templateName = `[Campaign Builder] ${vertical} ${today}`;
 
     const tmplRes = await fetch('https://api.iterable.com/api/templates/email/upsert', {
@@ -48,7 +48,7 @@ app.post('/api/push-to-iterable', async (req, res) => {
       throw new Error(`Template creation failed: ${await tmplRes.text()}`);
     }
 
-    console.log('htmlBody preview:', finalHtml.slice(0, 300));
+    console.log('finalHtml length:', finalHtml.length, '| image URL injected:', finalHtml.includes(imageUrl));
     const tmplData = await tmplRes.json();
     const idMatch = tmplData.msg?.match(/IDs:\s*(\d+)/);
     const templateId = idMatch ? idMatch[1] : null;
