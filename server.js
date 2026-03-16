@@ -48,7 +48,11 @@ app.post('/api/push-to-iterable', async (req, res) => {
       throw new Error(`Template creation failed: ${await tmplRes.text()}`);
     }
 
-    const { templateId } = await tmplRes.json();
+    const tmplData = await tmplRes.json();
+    console.log('Iterable template response:', JSON.stringify(tmplData));
+    console.log('htmlBody length:', finalHtml.length);
+
+    const templateId = tmplData.templateId ?? tmplData.id ?? tmplData.template?.id;
     res.json({ templateId, templateName });
   } catch (err) {
     console.error('Push to Iterable error:', err);
