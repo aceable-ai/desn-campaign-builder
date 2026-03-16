@@ -38,8 +38,9 @@ export function EmailPreviewPanel() {
     if (pushStatus === 'pushing' || !tileRef.current || !templateRef.current) return;
     setPushStatus('pushing');
     try {
-      await pushToIterable(tileRef.current, templateRef.current, emailConfig);
+      const { templateId } = await pushToIterable(tileRef.current, templateRef.current, emailConfig);
       setPushStatus('success');
+      window.open(`https://app.iterable.com/templates/email/${templateId}`, '_blank');
       setTimeout(() => setPushStatus('idle'), 3000);
     } catch (err) {
       console.error('Push to Iterable failed', err);
