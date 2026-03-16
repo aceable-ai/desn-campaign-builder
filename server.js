@@ -52,6 +52,15 @@ app.post('/api/push-to-iterable', async (req, res) => {
     const tmplData = await tmplRes.json();
     const idMatch = tmplData.msg?.match(/IDs:\s*(\d+)/);
     const templateId = idMatch ? idMatch[1] : null;
+
+    // Verify what Iterable actually stored
+    const verifyRes = await fetch(`https://api.iterable.com/api/templates/email/get?templateId=${templateId}`, {
+      headers: { 'Api-Key': apiKey },
+    });
+    const verifyData = await verifyRes.json();
+    console.log('Stored htmlBody length:', verifyData.htmlBody?.length ?? 0);
+    console.log('Stored template fields:', Object.keys(verifyData));
+
     res.json({ templateId, templateName });
   } catch (err) {
     console.error('Push to Iterable error:', err);
