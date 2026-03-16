@@ -49,10 +49,8 @@ app.post('/api/push-to-iterable', async (req, res) => {
     }
 
     const tmplData = await tmplRes.json();
-    console.log('Iterable template response:', JSON.stringify(tmplData));
-    console.log('htmlBody length:', finalHtml.length);
-
-    const templateId = tmplData.templateId ?? tmplData.id ?? tmplData.template?.id;
+    const idMatch = tmplData.msg?.match(/IDs:\s*(\d+)/);
+    const templateId = idMatch ? idMatch[1] : null;
     res.json({ templateId, templateName });
   } catch (err) {
     console.error('Push to Iterable error:', err);
