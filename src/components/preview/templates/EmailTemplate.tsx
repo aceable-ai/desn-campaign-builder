@@ -147,7 +147,7 @@ export const EmailTemplate = forwardRef<HTMLDivElement, Props>(({ config, tileRe
     <div ref={ref} style={{ width: W, backgroundColor: theme.outerBg, fontFamily: F }}>
 
       {/* ── 1. Header ─────────────────────────────────────────────────────── */}
-      <div style={{ backgroundColor: theme.headerBg }}>
+      <div data-section="header" style={{ backgroundColor: theme.headerBg }}>
         {hasPhone ? (
           <>
             <div style={{ padding: '16px 16px 12px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
@@ -175,7 +175,7 @@ export const EmailTemplate = forwardRef<HTMLDivElement, Props>(({ config, tileRe
         const lightBg = new Set(['#2CE1AB', '#71D7E1']);
         const bannerTextColor = lightBg.has(config.bannerColor.toUpperCase()) || lightBg.has(config.bannerColor) ? '#21333f' : '#ffffff';
         return (
-          <div style={{
+          <div data-section="banner" style={{
             backgroundColor: config.bannerColor,
             padding: '16px 24px',
             display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
@@ -192,7 +192,7 @@ export const EmailTemplate = forwardRef<HTMLDivElement, Props>(({ config, tileRe
 
       {/* ── 3. Hero ───────────────────────────────────────────────────────── */}
       {/* 600x647, pt/pb=48, pl/pr=32 */}
-      <div style={{ backgroundColor: theme.sectionBg, padding: '48px 32px' }}>
+      <div data-section="hero" style={{ backgroundColor: theme.sectionBg, padding: '48px 32px' }}>
         {/* Aligned copy block */}
         <div style={{ textAlign: config.heroAlignment }}>
           {/* Eyebrow */}
@@ -237,7 +237,7 @@ export const EmailTemplate = forwardRef<HTMLDivElement, Props>(({ config, tileRe
       </div>
 
       {/* ── 4. Hero Image Tiles ───────────────────────────────────────────── */}
-      <div ref={tileRef} style={{ backgroundColor: theme.sectionBg, padding: '48px 32px' }}>
+      <div ref={tileRef} data-section="hero-tiles" style={{ backgroundColor: theme.sectionBg, padding: '48px 32px' }}>
         {config.heroTileCount === 2 && (
           <div style={{ display: 'flex', gap: 12 }}>
             {/* Left — staggered 48px down */}
@@ -278,7 +278,7 @@ export const EmailTemplate = forwardRef<HTMLDivElement, Props>(({ config, tileRe
 
       {/* ── 5. App Download Banner ────────────────────────────────────────── */}
       {config.showAppBanner && (
-        <div style={{
+        <div data-section="app-banner" style={{
           backgroundColor: '#ffffff',
           padding: '48px',
           display: 'flex',
@@ -298,7 +298,7 @@ export const EmailTemplate = forwardRef<HTMLDivElement, Props>(({ config, tileRe
       )}
 
       {/* ── 6. Body Section ───────────────────────────────────────────────── */}
-      <div style={{
+      <div data-section="body" style={{
         backgroundColor: theme.sectionBg,
         padding: '48px 32px',
         display: 'flex',
@@ -349,7 +349,7 @@ export const EmailTemplate = forwardRef<HTMLDivElement, Props>(({ config, tileRe
       {/* ── 7. Awards Banner ──────────────────────────────────────────────── */}
       {config.showAwardsBanner && (
         config.awardsBannerStyle === 'newsweek' ? (
-          <div style={{ backgroundColor: theme.awardsBg, padding: '48px 32px' }}>
+          <div data-section="awards" style={{ backgroundColor: theme.awardsBg, padding: '48px 32px' }}>
             <div style={{ display: 'flex', gap: 32, alignItems: 'center' }}>
               {/* Left: Newsweek logo */}
               <div style={{ width: 252, flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
@@ -367,7 +367,7 @@ export const EmailTemplate = forwardRef<HTMLDivElement, Props>(({ config, tileRe
             </div>
           </div>
         ) : (
-          <div style={{ backgroundColor: theme.awardsBg, padding: '48px 32px' }}>
+          <div data-section="awards" style={{ backgroundColor: theme.awardsBg, padding: '48px 32px' }}>
             {/* Centered heading */}
             <h2 style={{ margin: '0 0 32px', fontFamily: F, fontSize: 24, fontWeight: 900, color: theme.headline, lineHeight: '30px', textAlign: 'center' }}>
               Trusted. Recognized. Award-Winning.
@@ -395,7 +395,7 @@ export const EmailTemplate = forwardRef<HTMLDivElement, Props>(({ config, tileRe
 
       {/* ── 8. Footer ─────────────────────────────────────────────────────── */}
       {/* 600×238, bg=#F1F5F5, padding=32, gap=24 */}
-      <div style={{ backgroundColor: theme.footerBg, padding: '32px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 24 }}>
+      <div data-section="footer" style={{ backgroundColor: theme.footerBg, padding: '32px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 24 }}>
 
         {/* App download — vertical, gap=12, centered */}
         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 12 }}>

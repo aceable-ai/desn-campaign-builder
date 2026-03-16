@@ -3,10 +3,12 @@ import { toPng } from 'html-to-image';
 import { useAssetStore } from '../../store/assetStore';
 import { EmailTemplate } from './templates/EmailTemplate';
 import { EMAIL_TOKENS } from '../../constants/sizes';
+import { pushToIterable } from '../../services/iterableExport';
 
 export function EmailPreviewPanel() {
   const emailConfig = useAssetStore((s) => s.emailConfig);
   const [isExporting, setIsExporting] = useState(false);
+  const [pushStatus, setPushStatus] = useState<'idle' | 'pushing' | 'success' | 'error'>('idle');
   const templateRef = useRef<HTMLDivElement>(null);
   const tileRef     = useRef<HTMLDivElement>(null);
 
@@ -29,6 +31,20 @@ export function EmailPreviewPanel() {
       alert('Export failed — check the console.');
     } finally {
       setIsExporting(false);
+    }
+  }
+
+  async function handlePushToIterable() {
+    if (pushStatus === 'pushing' || !tileRef.current || !templateRef.current) return;
+    setPushStatus('pushing');
+    try {
+      await pushToIterable(tileRef.current, templateRef.current, emailConfig);
+      setPushStatus('success');
+      setTimeout(() => setPushStatus('idle'), 3000);
+    } catch (err) {
+      console.error('Push to Iterable failed', err);
+      setPushStatus('error');
+      setTimeout(() => setPushStatus('idle'), 3000);
     }
   }
 
@@ -66,6 +82,25 @@ export function EmailPreviewPanel() {
                 Export PNG
               </>
             )}
+          </button>
+          <button
+            onClick={handlePushToIterable}
+            disabled={pushStatus === 'pushing'}
+            className={`flex items-center gap-2 rounded-full px-4 py-2 text-sm font-semibold transition-all ${
+              pushStatus === 'pushing'  ? 'cursor-not-allowed bg-white/20 text-white/40'
+              : pushStatus === 'success' ? 'bg-[#16a34a] text-white'
+              : pushStatus === 'error'   ? 'bg-red-500 text-white'
+              : 'bg-[#2563eb] text-white hover:bg-[#1d4ed8] active:scale-95'
+            }`}
+          >
+            {pushStatus === 'pushing' ? (
+              <>
+                <span className="inline-block h-3.5 w-3.5 animate-spin rounded-full border-2 border-white/40 border-t-white" />
+                Pushing…
+              </>
+            ) : pushStatus === 'success' ? 'Pushed to Iterable ✓'
+              : pushStatus === 'error'   ? 'Push failed'
+              : 'Push to Iterable'}
           </button>
         </div>
       </div>
