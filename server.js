@@ -1,13 +1,21 @@
 import express from 'express';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import { writeFileSync, mkdirSync } from 'fs';
+import { randomUUID } from 'crypto';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const app = express();
 const PORT = process.env.PORT || 3000;
+const UPLOADS_DIR = '/tmp/campaign-builder-uploads';
+
+try { mkdirSync(UPLOADS_DIR, { recursive: true }); } catch {}
 
 app.use(express.json({ limit: '20mb' }));
 app.use(express.static(path.join(__dirname, 'dist')));
+
+// Serve saved hero images
+app.use('/uploads', express.static(UPLOADS_DIR));
 
 app.post('/api/push-to-iterable', async (req, res) => {
   const { heroImageBase64, htmlBody, vertical } = req.body;
@@ -18,31 +26,16 @@ app.post('/api/push-to-iterable', async (req, res) => {
   }
 
   try {
-    // 1. Upload hero PNG to Iterable media library
-    const imageBuffer = Buffer.from(heroImageBase64, 'base64');
-    const blob = new Blob([imageBuffer], { type: 'image/png' });
+    // Save hero PNG to Railway filesystem and build a public URL for it
     const today = new Date().toISOString().slice(0, 10);
-    const filename = `hero-tiles-${vertical}-${today}.png`;
+    const filename = `hero-${vertical}-${today}-${randomUUID()}.png`;
+    writeFileSync(path.join(UPLOADS_DIR, filename), Buffer.from(heroImageBase64, 'base64'));
 
-    const fd = new FormData();
-    fd.append('image', blob, filename);
+    const protocol = req.headers['x-forwarded-proto'] || 'https';
+    const imageUrl = `${protocol}://${req.headers.host}/uploads/${filename}`;
 
-    const uploadRes = await fetch('https://api.iterable.com/api/images/upload', {
-      method: 'POST',
-      headers: { 'Api-Key': apiKey },
-      body: fd,
-    });
-
-    if (!uploadRes.ok) {
-      throw new Error(`Image upload failed: ${await uploadRes.text()}`);
-    }
-
-    const { url: imageUrl } = await uploadRes.json();
-
-    // 2. Inject uploaded image URL into the HTML
+    // Inject the image URL into the HTML and create the Iterable template
     const finalHtml = htmlBody.replace('HERO_IMAGE_PLACEHOLDER', imageUrl);
-
-    // 3. Create new template in Iterable
     const templateName = `[Campaign Builder] ${vertical} ${today}`;
 
     const tmplRes = await fetch('https://api.iterable.com/api/templates/email/upsert', {
