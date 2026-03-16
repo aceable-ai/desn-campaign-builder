@@ -15,7 +15,17 @@ function buildIterableHtml(templateEl: HTMLDivElement): string {
     tileSection.innerHTML = '<img src="HERO_IMAGE_PLACEHOLDER" width="600" style="display:block;width:100%" alt="" />';
   }
 
-  return clone.outerHTML;
+  return `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link href="https://fonts.googleapis.com/css2?family=Lato:wght@200;400;700;900&family=Nunito+Sans:wght@400;600;800;900&display=swap" rel="stylesheet">
+</head>
+<body style="margin:0;padding:0;background-color:#f4f9fc;">
+${clone.outerHTML}
+</body>
+</html>`;
 }
 
 export async function pushToIterable(

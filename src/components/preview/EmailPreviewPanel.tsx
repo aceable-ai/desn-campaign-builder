@@ -40,7 +40,10 @@ export function EmailPreviewPanel() {
     try {
       const { templateId } = await pushToIterable(tileRef.current, templateRef.current, emailConfig);
       setPushStatus('success');
-      window.open('https://app.iterable.com/templates/email', '_blank');
+      const url = templateId
+        ? `https://app.iterable.com/templates/${templateId}?projectId=1677`
+        : 'https://app.iterable.com/templates?projectId=1677';
+      window.open(url, '_blank');
       setTimeout(() => setPushStatus('idle'), 3000);
     } catch (err) {
       console.error('Push to Iterable failed', err);
