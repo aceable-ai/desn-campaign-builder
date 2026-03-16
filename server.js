@@ -48,6 +48,7 @@ app.post('/api/push-to-iterable', async (req, res) => {
       throw new Error(`Template creation failed: ${await tmplRes.text()}`);
     }
 
+    console.log('htmlBody preview:', finalHtml.slice(0, 300));
     const tmplData = await tmplRes.json();
     const idMatch = tmplData.msg?.match(/IDs:\s*(\d+)/);
     const templateId = idMatch ? idMatch[1] : null;
