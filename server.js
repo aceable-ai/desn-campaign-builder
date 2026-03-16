@@ -41,7 +41,7 @@ app.post('/api/push-to-iterable', async (req, res) => {
     const tmplRes = await fetch('https://api.iterable.com/api/templates/email/upsert', {
       method: 'POST',
       headers: { 'Api-Key': apiKey, 'Content-Type': 'application/json' },
-      body: JSON.stringify({ name: templateName, htmlBody: finalHtml }),
+      body: JSON.stringify({ name: templateName, htmlBody: finalHtml, clientTemplateId: filename }),
     });
 
     if (!tmplRes.ok) {
