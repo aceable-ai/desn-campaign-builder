@@ -353,7 +353,7 @@ export const EmailTemplate = forwardRef<HTMLDivElement, Props>(({ config, tileRe
             <div style={{ display: 'flex', gap: 32, alignItems: 'center' }}>
               {/* Left: Newsweek logo */}
               <div style={{ width: 252, flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                <img src={awardNewsweekUrl} alt="Newsweek" data-public-src="/awards/award-newsweek.png" style={{ width: 252, height: 'auto', display: 'block' }} />
+                <img src={awardNewsweekUrl} alt="Newsweek" data-public-src="https://d15k2d11r6t6rl.cloudfront.net/public/users/Integrators/669d5713-9b6a-46bb-bd7e-c542cff6dd6a/6440a75dcccb48a896c67c06dbfdf9f7/Newsweek_US-TOLP2025_Logo_Hor.png" style={{ width: 252, height: 'auto', display: 'block' }} />
               </div>
               {/* Right: heading + body */}
               <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
@@ -375,9 +375,9 @@ export const EmailTemplate = forwardRef<HTMLDivElement, Props>(({ config, tileRe
             {/* 3-column row */}
             <div style={{ display: 'flex', gap: 48 }}>
               {[
-                { img: awardNewsweekUrl,    alt: 'Newsweek',    imgH: 55,  publicSrc: '/awards/award-newsweek.png',    desc: 'Newsweek Top Online Learning Provider, 2025' },
-                { img: awardHousingwireUrl, alt: 'HousingWire', imgH: 38,  publicSrc: '/awards/award-housingwire.png', desc: "Hanley-Wood's HousingWire Tech 100, 2025" },
-                { img: awardFortuneUrl,     alt: 'Fortune',     imgH: 98,  publicSrc: '/awards/award-fortune.png',     desc: 'Fortune Best Real Estate School, 2024' },
+                { img: awardNewsweekUrl,    alt: 'Newsweek',    imgH: 55,  publicSrc: 'https://d15k2d11r6t6rl.cloudfront.net/public/users/Integrators/669d5713-9b6a-46bb-bd7e-c542cff6dd6a/6440a75dcccb48a896c67c06dbfdf9f7/Newsweek_US-TOLP2025_Logo_Hor.png',    desc: 'Newsweek Top Online Learning Provider, 2025' },
+                { img: awardHousingwireUrl, alt: 'HousingWire', imgH: 38,  publicSrc: 'https://d15k2d11r6t6rl.cloudfront.net/public/users/Integrators/669d5713-9b6a-46bb-bd7e-c542cff6dd6a/6440a75dcccb48a896c67c06dbfdf9f7/Tech%20100.png', desc: "Hanley-Wood's HousingWire Tech 100, 2025" },
+                { img: awardFortuneUrl,     alt: 'Fortune',     imgH: 98,  publicSrc: 'https://d15k2d11r6t6rl.cloudfront.net/public/users/Integrators/669d5713-9b6a-46bb-bd7e-c542cff6dd6a/6440a75dcccb48a896c67c06dbfdf9f7/Fortune.png',     desc: 'Fortune Best Real Estate School, 2024' },
               ].map((award) => (
                 <div key={award.alt} style={{ width: 147, flexShrink: 0, display: 'flex', flexDirection: 'column', gap: 12, alignItems: 'center' }}>
                   <div style={{ width: 147, height: 98, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
