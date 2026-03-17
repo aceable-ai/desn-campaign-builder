@@ -40,9 +40,10 @@ export function EmailPreviewPanel() {
     try {
       const { templateId } = await pushToIterable(tileRef.current, templateRef.current, emailConfig);
       setPushStatus('success');
+      const projectId = emailConfig.vertical === 'aceable-agent' ? 1677 : 1996;
       const url = templateId
-        ? `https://app.iterable.com/templates/editor?templateId=${templateId}`
-        : 'https://app.iterable.com/templates?projectId=1677';
+        ? `https://app.iterable.com/templates/editor?templateId=${templateId}&projectId=${projectId}`
+        : `https://app.iterable.com/templates?projectId=${projectId}`;
       window.open(url, '_blank');
       setTimeout(() => setPushStatus('idle'), 3000);
     } catch (err) {
