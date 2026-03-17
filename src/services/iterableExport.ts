@@ -1,11 +1,20 @@
 import { toPng } from 'html-to-image';
 import type { EmailConfig } from '../types/email';
 
-function buildIterableHtml(templateEl: HTMLDivElement): string {
+const ACEABLE_AGENT_LOGO_CDN = 'https://d15k2d11r6t6rl.cloudfront.net/public/users/Integrators/669d5713-9b6a-46bb-bd7e-c542cff6dd6a/6440a75dcccb48a896c67c06dbfdf9f7/Aceable-Agent-Horiz-Logo%204x.png';
+
+const ITERABLE_HEADER_HTML = `<table class="row row-1" align="center" width="100%" border="0" cellpadding="0" cellspacing="0" role="presentation" style="mso-table-lspace:0;mso-table-rspace:0"><tbody><tr><td><table class="row-content stack" align="center" border="0" cellpadding="0" cellspacing="0" role="presentation" style="mso-table-lspace:0;mso-table-rspace:0;background-color:#fff;color:#000;width:600px;margin:0 auto" width="600"><tbody><tr><td class="column column-1" width="100%" style="mso-table-lspace:0;mso-table-rspace:0;font-weight:400;text-align:left;vertical-align:top"><table class="image_block block-1 mobile_hide" width="100%" border="0" cellpadding="0" cellspacing="0" role="presentation" style="mso-table-lspace:0;mso-table-rspace:0"><tbody><tr><td class="pad" style="padding-bottom:16px;padding-left:8px;padding-right:8px;padding-top:16px;width:100%"><div class="alignment" align="center"><div style="max-width:210px"><a href="{{#if courseState}}{{#lookup productStates courseState as |pageurl|}}{{pageurl}}{{/lookup}}{{else}}https://www.aceableagent.com{{/if}}" target="_blank"><img src="LOGO_URL_PLACEHOLDER" style="display:block;height:auto;border:0;width:100%" width="210" alt="AceableAgent" title="AceableAgent" height="auto"></a></div></div></td></tr></tbody></table><table class="image_block block-2 desktop_hide" width="100%" border="0" cellpadding="0" cellspacing="0" role="presentation" style="mso-table-lspace:0;mso-table-rspace:0;mso-hide:all;display:none;max-height:0;overflow:hidden"><tbody><tr><td class="pad" style="padding-bottom:16px;padding-left:8px;padding-right:8px;padding-top:16px;width:100%"><div class="alignment" align="center"><div style="max-width:150px"><a href="{{#if courseState}}{{#lookup productStates courseState as |pageurl|}}{{pageurl}}{{/lookup}}{{else}}https://www.aceableagent.com{{/if}}" target="_blank"><img src="LOGO_URL_PLACEHOLDER" style="display:block;height:auto;border:0;width:100%" width="150" alt="AceableAgent" title="AceableAgent" height="auto"></a></div></div></td></tr></tbody></table></td></tr></tbody></table></td></tr></tbody></table>`;
+
+function buildIterableHtml(templateEl: HTMLDivElement, config: EmailConfig): string {
   const clone = templateEl.cloneNode(true) as HTMLDivElement;
 
-  // Strip header — replace with actual footer HTML from Iterable
-  clone.querySelector('[data-section="header"]')?.remove();
+  // Replace header with the real Aceable header HTML, swapping in the correct logo
+  const headerEl = clone.querySelector('[data-section="header"]');
+  const logoUrl = `${window.location.origin}/logos/${config.vertical}.svg`;
+  const headerHtml = ITERABLE_HEADER_HTML.split('LOGO_URL_PLACEHOLDER').join(logoUrl);
+  if (headerEl) {
+    headerEl.outerHTML = headerHtml;
+  }
 
   // Replace footer with the real Aceable footer HTML
   const footerEl = clone.querySelector('[data-section="footer"]');
@@ -45,7 +54,7 @@ export async function pushToIterable(
   });
 
   const heroImageBase64 = dataUrl.replace(/^data:image\/png;base64,/, '');
-  const htmlBody = buildIterableHtml(templateEl);
+  const htmlBody = buildIterableHtml(templateEl, config);
 
   const res = await fetch('/api/push-to-iterable', {
     method: 'POST',
