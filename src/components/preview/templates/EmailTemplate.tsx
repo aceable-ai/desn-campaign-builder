@@ -224,7 +224,7 @@ export const EmailTemplate = forwardRef<HTMLDivElement, Props>(({ config, tileRe
         </div>
         {/* Reviews — always centered */}
         {config.showReviews && (
-          <div style={{ textAlign: 'center', marginBottom: 24 }}>
+          <div data-section="reviews" style={{ textAlign: 'center', marginBottom: 24 }}>
             <img src={isDark ? trustpilotReviewsDarkUrl : trustpilotReviewsLightUrl} alt="Trustpilot reviews" style={{ maxWidth: '100%', height: 'auto', display: 'inline-block' }} />
           </div>
         )}
