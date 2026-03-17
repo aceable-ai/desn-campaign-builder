@@ -19,13 +19,11 @@ app.use('/uploads', express.static(UPLOADS_DIR));
 
 app.post('/api/push-to-iterable', async (req, res) => {
   const { heroImageBase64, htmlBody, vertical } = req.body;
-  const apiKey = vertical === 'aceable-agent'
-    ? process.env.ITERABLE_API_KEY_AGENT   // project 1677
-    : process.env.ITERABLE_API_KEY;        // project 1996
+  const apiKey = process.env.ITERABLE_API_KEY;
+  const projectId = vertical === 'aceable-agent' ? 1677 : 1996;
 
   if (!apiKey) {
-    const keyName = vertical === 'aceable-agent' ? 'ITERABLE_API_KEY_AGENT' : 'ITERABLE_API_KEY';
-    return res.status(500).json({ error: `${keyName} not configured` });
+    return res.status(500).json({ error: 'ITERABLE_API_KEY not configured' });
   }
 
   try {
@@ -44,7 +42,7 @@ app.post('/api/push-to-iterable', async (req, res) => {
     const tmplRes = await fetch('https://api.iterable.com/api/templates/email/upsert', {
       method: 'POST',
       headers: { 'Api-Key': apiKey, 'Content-Type': 'application/json' },
-      body: JSON.stringify({ name: templateName, html: finalHtml, clientTemplateId: filename, subject: '[Subject]' }),
+      body: JSON.stringify({ name: templateName, html: finalHtml, clientTemplateId: filename, subject: '[Subject]', projectId }),
     });
 
     if (!tmplRes.ok) {
