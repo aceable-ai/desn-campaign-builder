@@ -19,10 +19,13 @@ app.use('/uploads', express.static(UPLOADS_DIR));
 
 app.post('/api/push-to-iterable', async (req, res) => {
   const { heroImageBase64, htmlBody, vertical } = req.body;
-  const apiKey = process.env.ITERABLE_API_KEY;
+  const apiKey = vertical === 'aceable-agent'
+    ? process.env.ITERABLE_API_KEY_AGENT   // project 1677
+    : process.env.ITERABLE_API_KEY;        // project 1996
 
   if (!apiKey) {
-    return res.status(500).json({ error: 'ITERABLE_API_KEY not configured' });
+    const keyName = vertical === 'aceable-agent' ? 'ITERABLE_API_KEY_AGENT' : 'ITERABLE_API_KEY';
+    return res.status(500).json({ error: `${keyName} not configured` });
   }
 
   try {
