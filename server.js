@@ -21,10 +21,10 @@ app.post('/api/push-to-iterable', async (req, res) => {
   const { heroImageBase64, htmlBody, vertical } = req.body;
   const apiKey = vertical === 'aceable-agent'
     ? process.env.ITERABLE_API_KEY_AGENT   // project 1677
-    : process.env.ITERABLE_API_KEY;        // project 1996
+    : process.env.ITERABLE_API_KEY_ACE;    // project 1996
 
   if (!apiKey) {
-    const keyName = vertical === 'aceable-agent' ? 'ITERABLE_API_KEY_AGENT' : 'ITERABLE_API_KEY';
+    const keyName = vertical === 'aceable-agent' ? 'ITERABLE_API_KEY_AGENT' : 'ITERABLE_API_KEY_ACE';
     return res.status(500).json({ error: `${keyName} not configured` });
   }
 
