@@ -136,22 +136,28 @@ function buildIterableHtml(templateEl: HTMLDivElement, config: EmailConfig): str
     tileSection.innerHTML = '<img data-hero-src="HERO_IMAGE_PLACEHOLDER" width="600" style="display:block;width:100%" alt="" />';
   }
 
-  // Fix button <a> tags that came from the React clone (e.g. hero section CTA).
-  // React serializes colors as rgb() which some email clients mishandle, and
-  // Gmail overrides <a> text color with its own link blue unless a <span> locks it in.
-  clone.querySelectorAll<HTMLAnchorElement>('a').forEach((a) => {
-    if (a.style.backgroundColor) {
-      a.style.backgroundColor = rgbToHex(a.style.backgroundColor);
-    }
+  // Bulletproof buttons: Gmail strips background-color from <a> tags, making
+  // white-text-on-pink buttons invisible. Fix: move bg to <td bgcolor="hex">
+  // which Gmail can't strip. Also wrap text in <span> to lock the text color.
+  // Key: convert rgb() → hex first, since bgcolor="" only accepts hex values.
+  Array.from(clone.querySelectorAll<HTMLAnchorElement>('a')).forEach((a) => {
+    const bg = a.style.backgroundColor;
+    if (!bg) return;
+    const bgHex = rgbToHex(bg);
+    const radius = a.style.borderRadius || '0';
+    a.style.removeProperty('background-color');
     if (a.style.color) {
-      const hex = rgbToHex(a.style.color);
+      const colorHex = rgbToHex(a.style.color);
       const span = document.createElement('span');
-      span.style.color = hex;
+      span.style.color = colorHex;
       span.innerHTML = a.innerHTML;
       a.innerHTML = '';
       a.appendChild(span);
-      a.style.color = hex; // keep on <a> too for clients that respect it
+      a.style.color = colorHex;
     }
+    const wrap = document.createElement('div');
+    wrap.innerHTML = `<table border="0" cellpadding="0" cellspacing="0" role="presentation" style="mso-table-lspace:0;mso-table-rspace:0;border-collapse:separate;display:inline-table"><tbody><tr><td bgcolor="${bgHex}" style="border-radius:${radius}">${a.outerHTML}</td></tr></tbody></table>`;
+    a.replaceWith(wrap.firstElementChild!);
   });
 
   return `<!DOCTYPE html>
