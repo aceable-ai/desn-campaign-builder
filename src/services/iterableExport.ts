@@ -25,6 +25,13 @@ function esc(str: string): string {
     .replace(/"/g, '&quot;');
 }
 
+/** Convert browser-normalized rgb(r, g, b) back to #rrggbb hex for email client compatibility. */
+function rgbToHex(color: string): string {
+  const m = color.match(/rgb\(\s*(\d+),\s*(\d+),\s*(\d+)\s*\)/);
+  if (!m) return color;
+  return '#' + [m[1], m[2], m[3]].map((n) => parseInt(n).toString(16).padStart(2, '0')).join('');
+}
+
 function buildIterableHtml(templateEl: HTMLDivElement, config: EmailConfig): string {
   const clone = templateEl.cloneNode(true) as HTMLDivElement;
 
@@ -128,6 +135,24 @@ function buildIterableHtml(templateEl: HTMLDivElement, config: EmailConfig): str
     tileSection.style.padding = '0';
     tileSection.innerHTML = '<img data-hero-src="HERO_IMAGE_PLACEHOLDER" width="600" style="display:block;width:100%" alt="" />';
   }
+
+  // Fix button <a> tags that came from the React clone (e.g. hero section CTA).
+  // React serializes colors as rgb() which some email clients mishandle, and
+  // Gmail overrides <a> text color with its own link blue unless a <span> locks it in.
+  clone.querySelectorAll<HTMLAnchorElement>('a').forEach((a) => {
+    if (a.style.backgroundColor) {
+      a.style.backgroundColor = rgbToHex(a.style.backgroundColor);
+    }
+    if (a.style.color) {
+      const hex = rgbToHex(a.style.color);
+      const span = document.createElement('span');
+      span.style.color = hex;
+      span.innerHTML = a.innerHTML;
+      a.innerHTML = '';
+      a.appendChild(span);
+      a.style.color = hex; // keep on <a> too for clients that respect it
+    }
+  });
 
   return `<!DOCTYPE html>
 <html lang="en">
