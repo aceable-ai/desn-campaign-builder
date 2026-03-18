@@ -32,6 +32,23 @@ function buildIterableHtml(templateEl: HTMLDivElement, config: EmailConfig): str
   clone.style.margin = '0 auto';
   clone.style.display = 'block';
 
+  // Replace system-ui font stack with Trebuchet MS fallback on all elements
+  clone.querySelectorAll<HTMLElement>('*').forEach((el) => {
+    if (el.style?.fontFamily?.includes('system-ui')) {
+      el.style.fontFamily = el.style.fontFamily.replace(/system-ui,\s*sans-serif/g, "'Trebuchet MS',Arial,sans-serif");
+    }
+  });
+
+  // Fix banner emoji spacing — gap:8 is flexbox-only so add padding to emoji spans instead
+  const bannerEl = clone.querySelector('[data-section="banner"]');
+  if (bannerEl) {
+    const spans = bannerEl.querySelectorAll<HTMLElement>('span');
+    if (spans.length >= 3) {
+      spans[0].style.paddingRight = '8px';
+      spans[spans.length - 1].style.paddingLeft = '8px';
+    }
+  }
+
   // Replace header with the vertical-specific Iterable header HTML
   const headerEl = clone.querySelector('[data-section="header"]');
   let headerHtml: string;
