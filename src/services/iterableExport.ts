@@ -136,29 +136,37 @@ function buildIterableHtml(templateEl: HTMLDivElement, config: EmailConfig): str
     tileSection.innerHTML = '<img data-hero-src="HERO_IMAGE_PLACEHOLDER" width="600" style="display:block;width:100%" alt="" />';
   }
 
-  // Bulletproof buttons: Gmail strips background-color from <a> tags, making
-  // white-text-on-pink buttons invisible. Fix: move bg to <td bgcolor="hex">
-  // which Gmail can't strip. Also wrap text in <span> to lock the text color.
-  // Key: convert rgb() → hex first, since bgcolor="" only accepts hex values.
-  Array.from(clone.querySelectorAll<HTMLAnchorElement>('a')).forEach((a) => {
-    const bg = a.style.backgroundColor;
-    if (!bg) return;
-    const bgHex = rgbToHex(bg);
-    const radius = a.style.borderRadius || '0';
-    a.style.removeProperty('background-color');
+  // Convert rgb() colors to hex and wrap text in <span> to lock color against Gmail overrides.
+  // This restores secondary (outline) buttons perfectly — they work without needing a background.
+  clone.querySelectorAll<HTMLAnchorElement>('a').forEach((a) => {
+    if (a.style.backgroundColor) {
+      a.style.backgroundColor = rgbToHex(a.style.backgroundColor);
+    }
     if (a.style.color) {
-      const colorHex = rgbToHex(a.style.color);
+      const hex = rgbToHex(a.style.color);
       const span = document.createElement('span');
-      span.style.color = colorHex;
+      span.style.color = hex;
       span.innerHTML = a.innerHTML;
       a.innerHTML = '';
       a.appendChild(span);
-      a.style.color = colorHex;
+      a.style.color = hex;
     }
-    const wrap = document.createElement('div');
-    wrap.innerHTML = `<table border="0" cellpadding="0" cellspacing="0" role="presentation" style="mso-table-lspace:0;mso-table-rspace:0;border-collapse:separate;display:inline-table"><tbody><tr><td bgcolor="${bgHex}" style="border-radius:${radius}">${a.outerHTML}</td></tr></tbody></table>`;
-    a.replaceWith(wrap.firstElementChild!);
   });
+
+  // Hero CTA only: apply a targeted bulletproof table so the pink background
+  // survives Gmail (Gmail strips background-color from <a> tags, making white
+  // text invisible on white). Secondary buttons don't need this — their outline
+  // styling is visible even without a background.
+  // We identify the hero CTA as the <a> with a <span> child (added above) vs
+  // image links in the Trustpilot widget which have no <span>.
+  if (config.showCta) {
+    const heroCta = Array.from(
+      clone.querySelectorAll<HTMLAnchorElement>('[data-section="hero"] a')
+    ).find((a) => !!a.querySelector('span'));
+    if (heroCta) {
+      heroCta.outerHTML = `<table border="0" cellpadding="0" cellspacing="0" align="center" role="presentation" style="mso-table-lspace:0;mso-table-rspace:0"><tbody><tr><td bgcolor="#db306a" style="border-radius:100px;padding:18px 40px"><a href="#" style="font-family:${F};font-size:18px;font-weight:700;color:#ffffff;text-decoration:none;line-height:1;white-space:nowrap"><span style="color:#ffffff">${esc(config.ctaText)}</span></a></td></tr></tbody></table>`;
+    }
+  }
 
   return `<!DOCTYPE html>
 <html lang="en">
