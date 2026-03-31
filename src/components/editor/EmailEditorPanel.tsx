@@ -3,6 +3,7 @@ import { useAssetStore } from '../../store/assetStore';
 import { useDriveImages } from '../../hooks/useDriveImages';
 import { ImageGallery } from './ImageGallery';
 import { VerticalSelector } from './VerticalSelector';
+import { useShuffleImages } from '../../hooks/useShuffleImages';
 import type { HeroTileCount, TileAlignment } from '../../types/email';
 
 function Toggle({ on, onToggle }: { on: boolean; onToggle: () => void }) {
@@ -61,6 +62,32 @@ export function EmailEditorPanel() {
   const setEmailAwardsBannerStyle = useAssetStore((s) => s.setEmailAwardsBannerStyle);
 
   const { images, loading, error } = useDriveImages();
+
+  const { shuffle, shuffling } = useShuffleImages();
+
+  function handleShuffle() {
+    const copyText = [emailHeadlineRaw, emailConfig.bodyText].join(' ');
+    const count = emailConfig.heroTileCount;
+    const slots =
+      count === 2
+        ? [
+            { category: 'people' as const, onSelect: (s: Parameters<typeof setEmailTileImage>[1]) => setEmailTileImage('t1', s) },
+            { category: 'people' as const, onSelect: (s: Parameters<typeof setEmailTileImage>[1]) => setEmailTileImage('t2', s) },
+          ]
+        : count === 3
+        ? [
+            { category: 'people'  as const, onSelect: (s: Parameters<typeof setEmailTileImage>[1]) => setEmailTileImage('t1', s) },
+            { category: 'course'  as const, onSelect: (s: Parameters<typeof setEmailTileImage>[1]) => setEmailTileImage('t2', s) },
+            { category: 'objects' as const, onSelect: (s: Parameters<typeof setEmailTileImage>[1]) => setEmailTileImage('t3', s) },
+          ]
+        : [
+            { category: 'people'  as const, onSelect: (s: Parameters<typeof setEmailTileImage>[1]) => setEmailTileImage('t1', s) },
+            { category: 'course'  as const, onSelect: (s: Parameters<typeof setEmailTileImage>[1]) => setEmailTileImage('t2', s) },
+            { category: 'objects' as const, onSelect: (s: Parameters<typeof setEmailTileImage>[1]) => setEmailTileImage('t3', s) },
+            { category: 'objects' as const, onSelect: (s: Parameters<typeof setEmailTileImage>[1]) => setEmailTileImage('t4', s) },
+          ];
+    shuffle({ driveImages: images, copyText, slots });
+  }
 
   return (
     <aside className="flex h-full w-[380px] flex-shrink-0 flex-col overflow-y-auto border-r border-gray-200 bg-gray-50">
@@ -297,6 +324,21 @@ export function EmailEditorPanel() {
         <div className="space-y-3">
           <div className="flex items-center justify-between">
             <label className="block text-xs font-semibold uppercase tracking-wide text-gray-500">Hero Image</label>
+            <div className="flex items-center gap-2">
+            <button
+              onClick={handleShuffle}
+              disabled={shuffling || loading || !!error}
+              className="flex items-center gap-1.5 rounded-lg border border-gray-200 bg-white px-3 py-1.5 text-xs font-medium text-gray-600 transition-colors hover:border-indigo-300 hover:bg-indigo-50 hover:text-indigo-700 disabled:cursor-not-allowed disabled:opacity-40"
+            >
+              {shuffling ? (
+                <span className="h-3.5 w-3.5 animate-spin rounded-full border-2 border-indigo-400 border-t-transparent" />
+              ) : (
+                <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M4 4h5l3 3-3 3H4M20 20h-5l-3-3 3-3h5M4 20h5l8-8-3-3" />
+                </svg>
+              )}
+              {shuffling ? 'Shuffling…' : 'Shuffle'}
+            </button>
             <div className="grid grid-cols-3 gap-1.5">
               {([2, 3, 4] as HeroTileCount[]).map((n) => (
                 <button
@@ -311,6 +353,7 @@ export function EmailEditorPanel() {
                   {n} Tiles
                 </button>
               ))}
+            </div>
             </div>
           </div>
 
