@@ -6,6 +6,7 @@ import { ImageGallery } from './ImageGallery';
 import { useDriveImages } from '../../hooks/useDriveImages';
 import { useAssetStore } from '../../store/assetStore';
 import { useShuffleImages } from '../../hooks/useShuffleImages';
+import iconShuffle from '../../assets/icon-shuffle.svg?url';
 
 export function EditorPanel() {
   const { images, loading, error } = useDriveImages();
@@ -68,9 +69,7 @@ export function EditorPanel() {
             {shuffling ? (
               <span className="h-3.5 w-3.5 animate-spin rounded-full border-2 border-indigo-400 border-t-transparent" />
             ) : (
-              <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M4 4h5l3 3-3 3H4M20 20h-5l-3-3 3-3h5M4 20h5l8-8-3-3" />
-              </svg>
+              <img src={iconShuffle} alt="" className="h-3.5 w-3.5" />
             )}
             {shuffling ? 'Shuffling…' : 'Shuffle Images'}
           </button>
