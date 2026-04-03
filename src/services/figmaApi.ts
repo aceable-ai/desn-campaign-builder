@@ -42,6 +42,22 @@ function findText(node: FigmaNode, nameMatcher: (n: string) => boolean): string 
   return '';
 }
 
+// Scope hero copy to the first Hero instance — handles two Figma naming patterns:
+//   Pattern A (most emails): layers named Eyebrow / Headline / Body
+//   Pattern B (Email 04s):   layers named Eyebrow Text / "A short, punchy header..." / "Lorem ipsum..."
+function findHeroContent(frame: FigmaNode): { eyebrow: string; headline: string; body: string; cta: string } {
+  for (const child of frame.children ?? []) {
+    if (child.type === 'INSTANCE' && child.name === 'Hero') {
+      const eyebrow  = findText(child, (n) => n === 'Eyebrow' || n === 'Eyebrow Text');
+      const headline = findText(child, (n) => n === 'Headline' || /punchy header/i.test(n));
+      const body     = findText(child, (n) => n === 'Body' || /^lorem ipsum/i.test(n));
+      const cta      = findText(child, (n) => n === 'Button Text Goes Here');
+      return { eyebrow, headline, body, cta };
+    }
+  }
+  return { eyebrow: '', headline: '', body: '', cta: '' };
+}
+
 // Only look inside One-Column instances to avoid grabbing copy from other sections
 function findOneColumnContent(frame: FigmaNode): { headline: string; body: string; cta: string } {
   for (const child of frame.children ?? []) {
@@ -148,16 +164,14 @@ export async function getEmailsFromFigma(
       if (frame.type !== 'FRAME') continue;
       if (!/email/i.test(frame.name)) continue;
 
-      const eyebrow          = findText(frame, (n) => n === 'Eyebrow');
-      const headline         = findText(frame, (n) => n === 'Headline');
-      const body             = findText(frame, (n) => n === 'Body');
-      const cta              = findText(frame, (n) => n === 'Button Text Goes Here');
-      const banner           = findText(frame, (n) => /spring sale|sale/i.test(n));
+      const hero = findHeroContent(frame);
+      const banner = findText(frame, (n) => /spring sale|sale/i.test(n));
       // Scoped to One-Column instances only — avoids picking up copy from other Hero sections
       const oneCol = findOneColumnContent(frame);
       const secondaryHeadline = oneCol.headline;
       const bodySection       = oneCol.body;
       const bodySectionCta    = oneCol.cta;
+      const { eyebrow, headline, body, cta } = hero;
 
       if (!headline && !cta) continue;
 
