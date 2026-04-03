@@ -384,6 +384,13 @@ export const useAssetStore = create<AssetStore>((set) => ({
   loadEmailFromAirtable: (record) =>
     set((s) => {
       const words = parseHeadline(record.headline);
+      // Split "Spring Sale: Up to 50% off courses" → saleName + discount
+      const bannerParts = record.subjectLine.split(/:\s*/);
+      const bannerSaleName = bannerParts[0]?.trim() ?? record.subjectLine;
+      const bannerDiscount = bannerParts[1]?.trim() ?? s.emailConfig.bannerDiscount;
+      const heroSlot = record.heroImageUrl
+        ? { objectUrl: record.heroImageUrl, file: null }
+        : s.emailConfig.tileImages.t1;
       return {
         mode: 'email' as AppMode,
         emailHeadlineRaw: record.headline,
@@ -398,7 +405,9 @@ export const useAssetStore = create<AssetStore>((set) => ({
           ctaText: record.ctaCopy,
           showEyebrow: !!record.previewText,
           eyebrowText: record.previewText,
-          bannerSaleName: record.subjectLine,
+          bannerSaleName,
+          bannerDiscount,
+          tileImages: { ...s.emailConfig.tileImages, t1: heroSlot },
         },
       };
     }),

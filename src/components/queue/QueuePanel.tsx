@@ -101,7 +101,7 @@ function FigmaImporter({ onImport }: { onImport: (records: CampaignRecord[]) => 
           disabled={!isValidUrl || loading}
           className="shrink-0 rounded-lg bg-violet-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-violet-700 disabled:opacity-40 transition-colors"
         >
-          {loading ? 'Importing…' : 'Import'}
+          {loading ? 'Importing images…' : 'Import'}
         </button>
       </div>
       {error && <p className="mt-1.5 text-xs text-red-500">{error}</p>}

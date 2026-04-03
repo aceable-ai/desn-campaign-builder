@@ -8,7 +8,6 @@ export function parseFigmaUrl(url: string): { fileKey: string; nodeId: string | 
   try {
     const u = new URL(url);
     const parts = u.pathname.split('/');
-    // /design/{fileKey}/... or /file/{fileKey}/...
     const keyIndex = parts.findIndex((p) => p === 'design' || p === 'file');
     if (keyIndex === -1 || !parts[keyIndex + 1]) return null;
     const fileKey = parts[keyIndex + 1];
@@ -30,7 +29,7 @@ interface FigmaNode {
   children?: FigmaNode[];
 }
 
-// ─── Text extraction helpers ──────────────────────────────────────────────────
+// ─── Text extraction ──────────────────────────────────────────────────────────
 
 function findText(node: FigmaNode, nameMatcher: (n: string) => boolean): string {
   if (node.type === 'TEXT' && nameMatcher(node.name) && node.characters) {
@@ -43,6 +42,16 @@ function findText(node: FigmaNode, nameMatcher: (n: string) => boolean): string 
   return '';
 }
 
+function findHeroImageNodeId(frame: FigmaNode): string | null {
+  for (const child of frame.children ?? []) {
+    if (child.type === 'FRAME' &&
+        (child.name === 'Hero Image' || child.name === 'Illustration')) {
+      return child.id;
+    }
+  }
+  return null;
+}
+
 function parseVerticalFromSection(sectionName: string): CampaignRecord['vertical'] {
   const s = sectionName.toUpperCase();
   if (s.includes('INS')) return 'aceable-insurance';
@@ -51,41 +60,39 @@ function parseVerticalFromSection(sectionName: string): CampaignRecord['vertical
   return 'aceable';
 }
 
-function extractEmailRecord(
-  frame: FigmaNode,
-  sectionName: string,
+// ─── Image export ─────────────────────────────────────────────────────────────
+
+async function batchExportImages(
   fileKey: string,
-): CampaignRecord {
-  // Eyebrow: layer named exactly "Eyebrow" (not "Eyebrow Text" which is the placeholder label)
-  const eyebrow = findText(frame, (n) => n === 'Eyebrow');
-
-  // Headline: layer named "Headline"
-  const headline = findText(frame, (n) => n === 'Headline');
-
-  // Body: layer named "Body"
-  const body = findText(frame, (n) => n === 'Body');
-
-  // CTA: first "Button Text Goes Here" layer (the hero button)
-  const cta = findText(frame, (n) => n === 'Button Text Goes Here');
-
-  // Banner: the shared banner text layer
-  const banner = findText(frame, (n) => n.toLowerCase().includes('spring sale') || n.toLowerCase().includes('sale'));
-
-  return {
-    airtableId: `figma_${fileKey}_${frame.id}`,
-    campaignName: `${sectionName} — ${frame.name}`,
-    seriesOrder: parseInt(frame.name.replace(/\D/g, '') || '0', 10),
-    vertical: parseVerticalFromSection(sectionName),
-    status: 'Figma',
-    subjectLine: banner,
-    previewText: eyebrow,
-    headline,
-    bodyCopy: body,
-    ctaCopy: cta,
-  };
+  nodeIds: string[],
+  apiToken: string,
+): Promise<Record<string, string>> {
+  if (nodeIds.length === 0) return {};
+  const res = await fetch(
+    `${FIGMA_API}/images/${fileKey}?ids=${nodeIds.join(',')}&format=png&scale=2`,
+    { headers: { 'X-Figma-Token': apiToken } },
+  );
+  if (!res.ok) return {};
+  const data = await res.json() as { images: Record<string, string> };
+  return data.images ?? {};
 }
 
-// ─── Main export function ─────────────────────────────────────────────────────
+async function imageUrlToDataUrl(url: string): Promise<string> {
+  try {
+    const res = await fetch(url);
+    const blob = await res.blob();
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(reader.result as string);
+      reader.onerror = reject;
+      reader.readAsDataURL(blob);
+    });
+  } catch {
+    return url;
+  }
+}
+
+// ─── Main export ──────────────────────────────────────────────────────────────
 
 export async function getEmailsFromFigma(
   figmaUrl: string,
@@ -96,59 +103,86 @@ export async function getEmailsFromFigma(
 
   const { fileKey, nodeId } = parsed;
 
-  // Fetch the canvas node (or specific node if provided)
   const ids = nodeId ?? '';
   const endpoint = ids
     ? `${FIGMA_API}/files/${fileKey}/nodes?ids=${encodeURIComponent(ids)}`
     : `${FIGMA_API}/files/${fileKey}`;
 
-  const res = await fetch(endpoint, {
-    headers: { 'X-Figma-Token': apiToken },
-  });
-
-  if (!res.ok) {
-    throw new Error(`Figma API error: ${res.status} ${res.statusText}`);
-  }
+  const res = await fetch(endpoint, { headers: { 'X-Figma-Token': apiToken } });
+  if (!res.ok) throw new Error(`Figma API error: ${res.status} ${res.statusText}`);
 
   const data = await res.json() as Record<string, unknown>;
 
-  // Get the canvas children
   let canvasChildren: FigmaNode[] = [];
-
   if (ids) {
     const nodes = data.nodes as Record<string, { document: FigmaNode }>;
     const root = Object.values(nodes)[0]?.document;
     canvasChildren = root?.children ?? [];
   } else {
     const pages = (data.document as FigmaNode).children ?? [];
-    // Find the "Email" canvas page
     const emailPage = pages.find((p) => p.name.toLowerCase().includes('email')) ?? pages[0];
     canvasChildren = emailPage?.children ?? [];
   }
 
-  const records: CampaignRecord[] = [];
+  // ── Pass 1: extract copy + collect image node IDs ─────────────────────────
+  type Draft = { record: Omit<CampaignRecord, 'heroImageUrl'>; imageNodeId: string | null };
+  const drafts: Draft[] = [];
 
   for (const section of canvasChildren) {
-    // Only process SECTION nodes that look like email verticals
     if (section.type !== 'SECTION') continue;
-    const sectionName = section.name;
 
     for (const frame of section.children ?? []) {
       if (frame.type !== 'FRAME') continue;
-      // Only process frames named "Email XX"
       if (!/email/i.test(frame.name)) continue;
 
-      const record = extractEmailRecord(frame, sectionName, fileKey);
-      // Only add if we got at least a headline or CTA
-      if (record.headline || record.ctaCopy) {
-        records.push(record);
-      }
+      const eyebrow  = findText(frame, (n) => n === 'Eyebrow');
+      const headline = findText(frame, (n) => n === 'Headline');
+      const body     = findText(frame, (n) => n === 'Body');
+      const cta      = findText(frame, (n) => n === 'Button Text Goes Here');
+      const banner   = findText(frame, (n) => /spring sale|sale/i.test(n));
+
+      if (!headline && !cta) continue;
+
+      drafts.push({
+        record: {
+          airtableId:   `figma_${fileKey}_${frame.id}`,
+          campaignName: `${section.name} — ${frame.name}`,
+          seriesOrder:  parseInt(frame.name.replace(/\D/g, '') || '0', 10),
+          vertical:     parseVerticalFromSection(section.name),
+          status:       'Figma',
+          subjectLine:  banner,
+          previewText:  eyebrow,
+          headline,
+          bodyCopy:     body,
+          ctaCopy:      cta,
+        },
+        imageNodeId: findHeroImageNodeId(frame),
+      });
     }
   }
 
-  if (records.length === 0) {
+  if (drafts.length === 0) {
     throw new Error('No email frames found. Make sure the link points to a canvas with email sections.');
   }
 
-  return records;
+  // ── Pass 2: batch export image URLs from Figma ────────────────────────────
+  const imageNodeIds = drafts
+    .map((d) => d.imageNodeId)
+    .filter((id): id is string => id !== null);
+
+  const exportedUrls = await batchExportImages(fileKey, imageNodeIds, apiToken);
+
+  // Convert S3 URLs to base64 in parallel (avoids CORS issues on PNG export)
+  const base64Map: Record<string, string> = {};
+  await Promise.all(
+    Object.entries(exportedUrls).map(async ([nid, url]) => {
+      if (url) base64Map[nid] = await imageUrlToDataUrl(url);
+    }),
+  );
+
+  // ── Pass 3: merge images into final records ───────────────────────────────
+  return drafts.map(({ record, imageNodeId }) => ({
+    ...record,
+    heroImageUrl: imageNodeId ? base64Map[imageNodeId] : undefined,
+  }));
 }
