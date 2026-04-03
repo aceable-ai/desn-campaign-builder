@@ -42,6 +42,19 @@ function findText(node: FigmaNode, nameMatcher: (n: string) => boolean): string 
   return '';
 }
 
+// Only look inside One-Column instances to avoid grabbing copy from other sections
+function findOneColumnContent(frame: FigmaNode): { headline: string; body: string; cta: string } {
+  for (const child of frame.children ?? []) {
+    if (child.type === 'INSTANCE' && /one.column/i.test(child.name)) {
+      const headline = findText(child, (n) => /punchy header/i.test(n));
+      const body     = findText(child, (n) => /lorem ipsum/i.test(n));
+      const cta      = findText(child, (n) => n === 'Button Text');
+      if (headline || body) return { headline, body, cta };
+    }
+  }
+  return { headline: '', body: '', cta: '' };
+}
+
 function findHeroImageNodeId(frame: FigmaNode): string | null {
   for (const child of frame.children ?? []) {
     if (child.type === 'FRAME' &&
@@ -140,10 +153,11 @@ export async function getEmailsFromFigma(
       const body             = findText(frame, (n) => n === 'Body');
       const cta              = findText(frame, (n) => n === 'Button Text Goes Here');
       const banner           = findText(frame, (n) => /spring sale|sale/i.test(n));
-      // One-Column section: secondary headline + body section text
-      const secondaryHeadline = findText(frame, (n) => /punchy header/i.test(n));
-      const bodySection       = findText(frame, (n) => /lorem ipsum/i.test(n));
-      const bodySectionCta    = findText(frame, (n) => n === 'Button Text');
+      // Scoped to One-Column instances only — avoids picking up copy from other Hero sections
+      const oneCol = findOneColumnContent(frame);
+      const secondaryHeadline = oneCol.headline;
+      const bodySection       = oneCol.body;
+      const bodySectionCta    = oneCol.cta;
 
       if (!headline && !cta) continue;
 
