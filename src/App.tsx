@@ -3,6 +3,7 @@ import { EditorPanel } from './components/editor/EditorPanel';
 import { PreviewPanel } from './components/preview/PreviewPanel';
 import { EmailEditorPanel } from './components/editor/EmailEditorPanel';
 import { EmailPreviewPanel } from './components/preview/EmailPreviewPanel';
+import { QueuePanel } from './components/queue/QueuePanel';
 import { useAssetStore } from './store/assetStore';
 
 type Channel = 'paid' | 'email';
@@ -74,11 +75,28 @@ export default function App() {
             )}
           </div>
         ))}
+
+        <button
+          onClick={() => { setMode('queue'); setOpenDropdown(null); }}
+          className={`flex items-center gap-1.5 rounded-full px-4 py-1.5 text-xs font-semibold transition-all ${
+            mode === 'queue'
+              ? 'bg-indigo-600 text-white'
+              : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+          }`}
+        >
+          <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+            <rect x="1" y="2" width="10" height="8" rx="1.5" stroke="currentColor" strokeWidth="1.3"/>
+            <path d="M3 5h6M3 7.5h4" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round"/>
+          </svg>
+          Copy Queue
+        </button>
       </div>
 
       {/* ── Split layout ── */}
       <div className="flex flex-1 overflow-hidden">
-        {mode === 'paid' ? (
+        {mode === 'queue' ? (
+          <QueuePanel />
+        ) : mode === 'paid' ? (
           <>
             <EditorPanel />
             <PreviewPanel

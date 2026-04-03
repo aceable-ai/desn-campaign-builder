@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import type { AssetConfig, HeadlineSegment, ImageSlot, Vertical, CanvasSize, ThemeAlignH, ThemeAlignV } from '../types/asset';
 import type { EmailConfig, HeaderColorScheme, HeroAlignment, HeroTileCount, TileTag, TileAlignment } from '../types/email';
+import type { CampaignRecord } from '../services/airtableApi';
 
 // ─── Headline helpers ─────────────────────────────────────────────────────────
 
@@ -26,7 +27,7 @@ function groupSegments(words: HeadlineSegment[]): HeadlineSegment[] {
 
 // ─── Store interface ──────────────────────────────────────────────────────────
 
-export type AppMode = 'paid' | 'email';
+export type AppMode = 'paid' | 'email' | 'queue';
 
 interface AssetStore {
   mode: AppMode;
@@ -94,6 +95,7 @@ interface AssetStore {
   setEmailAppBannerText: (t: string) => void;
   setEmailShowAwardsBanner: (v: boolean) => void;
   setEmailAwardsBannerStyle: (s: 'newsweek' | 'all-awards') => void;
+  loadEmailFromAirtable: (record: CampaignRecord) => void;
 }
 
 // ─── Defaults ─────────────────────────────────────────────────────────────────
@@ -378,4 +380,26 @@ export const useAssetStore = create<AssetStore>((set) => ({
     set((s) => ({ emailConfig: { ...s.emailConfig, showAwardsBanner } })),
   setEmailAwardsBannerStyle: (awardsBannerStyle) =>
     set((s) => ({ emailConfig: { ...s.emailConfig, awardsBannerStyle } })),
+
+  loadEmailFromAirtable: (record) =>
+    set((s) => {
+      const words = parseHeadline(record.headline);
+      return {
+        mode: 'email' as AppMode,
+        emailHeadlineRaw: record.headline,
+        emailHeadlineWords: words,
+        emailConfig: {
+          ...s.emailConfig,
+          vertical: record.vertical as Vertical,
+          headline: groupSegments(words),
+          showBody: !!record.bodyCopy,
+          bodyText: record.bodyCopy,
+          showCta: !!record.ctaCopy,
+          ctaText: record.ctaCopy,
+          showEyebrow: !!record.previewText,
+          eyebrowText: record.previewText,
+          bannerSaleName: record.subjectLine,
+        },
+      };
+    }),
 }));
