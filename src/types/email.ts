@@ -17,6 +17,7 @@ export interface TileTag {
 export interface EmailConfig {
   vertical: Vertical;
   headerColorScheme: HeaderColorScheme;
+  previewText: string;
 
   // Banner strip
   bannerColor: string;

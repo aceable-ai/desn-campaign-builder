@@ -168,6 +168,10 @@ function buildIterableHtml(templateEl: HTMLDivElement, config: EmailConfig): str
     }
   }
 
+  const preheader = config.previewText
+    ? `<div style="display:none;max-height:0;overflow:hidden;mso-hide:all">${esc(config.previewText)}</div>`
+    : '';
+
   return `<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -175,6 +179,7 @@ function buildIterableHtml(templateEl: HTMLDivElement, config: EmailConfig): str
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 </head>
 <body style="margin:0;padding:0;background-color:#ffffff;">
+${preheader}
 <!-- Google Fonts via style tag (more email-client compatible than link in head) -->
 <style>@import url('https://fonts.googleapis.com/css2?family=Lato:wght@200;400;700;900&family=Nunito+Sans:wght@400;600;800;900&display=swap');</style>
 ${clone.outerHTML}

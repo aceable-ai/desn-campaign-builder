@@ -95,6 +95,7 @@ interface AssetStore {
   setEmailAppBannerText: (t: string) => void;
   setEmailShowAwardsBanner: (v: boolean) => void;
   setEmailAwardsBannerStyle: (s: 'newsweek' | 'all-awards') => void;
+  setEmailPreviewText: (t: string) => void;
   loadEmailFromAirtable: (record: CampaignRecord) => void;
 }
 
@@ -148,6 +149,7 @@ const defaultEmailHeadlineWords: HeadlineSegment[] = [
 const defaultEmailConfig: EmailConfig = {
   vertical: 'aceable',
   headerColorScheme: 'light',
+  previewText: '',
   bannerColor: '#2689CA',
   bannerSaleName: 'Sale Name Goes Here',
   bannerDiscount: 'XX% off courses',
@@ -381,6 +383,9 @@ export const useAssetStore = create<AssetStore>((set) => ({
   setEmailAwardsBannerStyle: (awardsBannerStyle) =>
     set((s) => ({ emailConfig: { ...s.emailConfig, awardsBannerStyle } })),
 
+  setEmailPreviewText: (previewText) =>
+    set((s) => ({ emailConfig: { ...s.emailConfig, previewText } })),
+
   loadEmailFromAirtable: (record) =>
     set((s) => {
       const words = parseHeadline(record.headline);
@@ -403,6 +408,7 @@ export const useAssetStore = create<AssetStore>((set) => ({
           bodyText: /^lorem ipsum/i.test(record.bodyCopy) ? '' : record.bodyCopy,
           showCta: !!record.ctaCopy,
           ctaText: record.ctaCopy,
+          previewText: record.previewText ?? '',
           showEyebrow: !!record.previewText && record.previewText !== 'Eyebrow Text',
           eyebrowText: record.previewText !== 'Eyebrow Text' ? record.previewText : s.emailConfig.eyebrowText,
           bannerSaleName,

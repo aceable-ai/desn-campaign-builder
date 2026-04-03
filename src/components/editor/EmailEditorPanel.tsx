@@ -28,6 +28,7 @@ export function EmailEditorPanel() {
   const emailHeadlineRaw          = useAssetStore((s) => s.emailHeadlineRaw);
 
   const setEmailVertical          = useAssetStore((s) => s.setEmailVertical);
+  const setEmailPreviewText       = useAssetStore((s) => s.setEmailPreviewText);
   const setEmailBannerColor       = useAssetStore((s) => s.setEmailBannerColor);
   const setEmailBannerSaleName    = useAssetStore((s) => s.setEmailBannerSaleName);
   const setEmailBannerDiscount    = useAssetStore((s) => s.setEmailBannerDiscount);
@@ -120,6 +121,20 @@ export function EmailEditorPanel() {
               </button>
             ))}
           </div>
+        </div>
+
+        {/* Preview Text */}
+        <div className="rounded-lg border border-gray-200 bg-white px-4 py-3 space-y-1">
+          <label className="block text-xs font-semibold uppercase tracking-wide text-gray-500">
+            Preview Text <span className="font-normal normal-case tracking-normal text-gray-400">(inbox preheader)</span>
+          </label>
+          <input
+            type="text"
+            className="w-full rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm text-gray-800 shadow-sm focus:border-indigo-400 focus:outline-none focus:ring-1 focus:ring-indigo-400"
+            value={emailConfig.previewText}
+            onChange={(e) => setEmailPreviewText(e.target.value)}
+            placeholder="Text shown in inbox below subject line…"
+          />
         </div>
 
         {/* Banner */}
