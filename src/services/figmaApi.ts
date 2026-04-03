@@ -135,11 +135,15 @@ export async function getEmailsFromFigma(
       if (frame.type !== 'FRAME') continue;
       if (!/email/i.test(frame.name)) continue;
 
-      const eyebrow  = findText(frame, (n) => n === 'Eyebrow');
-      const headline = findText(frame, (n) => n === 'Headline');
-      const body     = findText(frame, (n) => n === 'Body');
-      const cta      = findText(frame, (n) => n === 'Button Text Goes Here');
-      const banner   = findText(frame, (n) => /spring sale|sale/i.test(n));
+      const eyebrow          = findText(frame, (n) => n === 'Eyebrow');
+      const headline         = findText(frame, (n) => n === 'Headline');
+      const body             = findText(frame, (n) => n === 'Body');
+      const cta              = findText(frame, (n) => n === 'Button Text Goes Here');
+      const banner           = findText(frame, (n) => /spring sale|sale/i.test(n));
+      // One-Column section: secondary headline + body section text
+      const secondaryHeadline = findText(frame, (n) => /punchy header/i.test(n));
+      const bodySection       = findText(frame, (n) => /lorem ipsum/i.test(n));
+      const bodySectionCta    = findText(frame, (n) => n === 'Button Text');
 
       if (!headline && !cta) continue;
 
@@ -155,6 +159,9 @@ export async function getEmailsFromFigma(
           headline,
           bodyCopy:     body,
           ctaCopy:      cta,
+          secondaryHeadline: secondaryHeadline || undefined,
+          bodySection:       bodySection || undefined,
+          bodySectionCta:    bodySectionCta || undefined,
         },
         imageNodeId: findHeroImageNodeId(frame),
       });

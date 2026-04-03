@@ -408,6 +408,11 @@ export const useAssetStore = create<AssetStore>((set) => ({
           bannerSaleName,
           bannerDiscount,
           tileImages: { ...s.emailConfig.tileImages, t1: heroSlot },
+          showSecondaryHeadline: !!record.secondaryHeadline,
+          secondaryHeadlineText: record.secondaryHeadline ?? s.emailConfig.secondaryHeadlineText,
+          bodySectionText: record.bodySection ?? s.emailConfig.bodySectionText,
+          showBodyCta: !!record.bodySectionCta,
+          bodyCtaText: record.bodySectionCta ?? s.emailConfig.bodyCtaText,
         },
       };
     }),

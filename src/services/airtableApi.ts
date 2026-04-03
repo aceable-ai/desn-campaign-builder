@@ -14,6 +14,9 @@ export interface CampaignRecord {
   vertical: 'aceable' | 'aceable-agent' | 'aceable-insurance' | 'aceable-mortgage';
   status: string;
   heroImageUrl?: string;
+  secondaryHeadline?: string;
+  bodySection?: string;
+  bodySectionCta?: string;
 }
 
 interface AirtableRecord {
